@@ -7,6 +7,7 @@ import com.adobe.web.utils.WebServerConstants;
 import org.apache.log4j.Logger;
 
 import java.io.*;
+import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
@@ -15,8 +16,8 @@ import java.util.TimeZone;
 /**
  * It handles the request processing and response creation.
  */
-public class Reader {
-    private static Logger logger = Logger.getLogger(Reader.class.getName());
+public class ReaderHelper {
+    private static Logger logger = Logger.getLogger(ReaderHelper.class.getName());
 
     /**
      * It reads the request line from the client which is
@@ -49,14 +50,6 @@ public class Reader {
         throw new MalformedRequestException("the request line is malformed");
     }
 
-    /**
-     *      *
-     * @param statusCode            - the response status code
-     * @param responseMessage       - the response message
-     * @param fileObject            - the file to be returned
-     * @param charStreamBufferedOut - streams connected to client
-     * @param byteStreamBufferedOut - stream connected to client
-     */
     /**
      * This method will return response to client with the File
      * @param statusCode Status code of response
@@ -197,7 +190,7 @@ public class Reader {
         try {
             fileResource = new BufferedInputStream(new FileInputStream(file));
         } catch (FileNotFoundException e1) {
-            Reader.serverFormattedResponseToClient(ResponseCodeParams.FILE_NOT_FOUND, "Not Found",
+            ReaderHelper.serverFormattedResponseToClient(ResponseCodeParams.FILE_NOT_FOUND, "Not Found",
                     "the file you requested - " + file.getName()
                             + " does not exist on server" + "<hr>",
                     charStreamBufferedOut, outputStream, "close");
@@ -205,5 +198,52 @@ public class Reader {
         }
 
         return fileResource;
+    }
+
+    /**
+     * This will delete the boundary from the file dumped
+     * @param f File object
+     * @param boundary boundary character
+     * @throws IOException Exception in case of input/output failures
+     */
+    public static void DeleteBoundaryFromFile(File f, String boundary)
+            throws IOException {
+        FileChannel outChan = null;
+        FileOutputStream file = null;
+        try {
+            file = new FileOutputStream(f, true);
+            outChan = file.getChannel();
+            long newSize = f.length() - boundary.length();
+            outChan.truncate(newSize);
+        } finally {
+            if (outChan != null)
+                outChan.close();
+            if (file != null)
+                file.close();
+        }
+    }
+
+    /**
+     * Creates the file path for the file which has to be deleted.
+     * @param requestUri Client requset uri
+     * @return Return absolute path for the file which is requested to be deleted.
+     */
+    public static String getAbsoluteFilePath(String requestUri) {
+        String resourcePath;
+        StringBuffer outputResource = new StringBuffer(50);
+        if (requestUri.equals("/")) {
+            resourcePath = WebServerConstants.HOSTPATH + File.separator + "index.html";
+            return resourcePath;
+        } else {
+            String pathList[] = requestUri.split(WebServerConstants.URISeparator);
+            for (int i = 0; i < pathList.length; i++) {
+                if (pathList[i] != null && pathList[i].length() > 0)
+                    outputResource.append(File.separator + pathList[i]);
+            }
+
+            resourcePath = WebServerConstants.HOSTPATH + outputResource.toString();
+        }
+
+        return resourcePath;
     }
 }

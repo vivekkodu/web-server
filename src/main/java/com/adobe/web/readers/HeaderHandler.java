@@ -20,7 +20,7 @@ public class HeaderHandler {
      * @return - a string containing all the header fields
      * @throws IOException exception in input or output
      */
-    public static String headerReader(InputStream clientInput)
+    public static String readHeader(InputStream clientInput)
             throws IOException {
 
         StringBuffer clientHeaders = new StringBuffer(100);
@@ -71,7 +71,7 @@ public class HeaderHandler {
      * @return -a hashtable with header name and header value as the key value
      * pair
      */
-    public static Hashtable<String, String> getclientHeadersinHashTable(
+    public static Hashtable<String, String> getClientHeaders(
             String clientHeaders) {
 
         if (clientHeaders == null) {
@@ -86,7 +86,7 @@ public class HeaderHandler {
         int length = headerList.length;
         for (int i = 0; i < length && headerList[i] != null
                 && headerList[i].length() > 0; i++) {
-            String property[] = getPropertyAndValue(headerList[i]);
+            String property[] = getHeaderProperties(headerList[i]);
             if (property != null) {
                 // if the header name is already present then the second header
                 // value is appended to the name
@@ -104,12 +104,12 @@ public class HeaderHandler {
     }
 
     /**
-     * This is used for spliiting the multipart header
+     * This is used for splitting the multipart header
      *
      * @param header header
      * @return array of header parts
      */
-    public static String[] getPropertyAndValue(String header) {
+    public static String[] getHeaderProperties(String header) {
 
         header = header.replaceAll("\\s+", " ");
         String[] strArr = header.split(":", 2);

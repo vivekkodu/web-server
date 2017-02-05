@@ -2,7 +2,6 @@ package com.adobe.web.readers;
 
 import org.apache.log4j.Logger;
 
-import com.adobe.web.utils.ReaderHelper;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -64,7 +63,7 @@ public class MultipartRequestProcess {
     private static void searchSubString(InputStream inputStream,
                                         String boundaryValue, int[] preProcessPattern) {
         int j = 0;
-        int c = -1;
+        int c;
         // pattern and text lengths
 
         int boundaryLength = boundaryValue.length();
@@ -103,7 +102,7 @@ public class MultipartRequestProcess {
             throws IOException {
 
         int j = 0;
-        int c = -1;
+        int c;
         // pattern and text lengths
 
         int boundaryLength = boundaryValue.length();
@@ -215,9 +214,9 @@ public class MultipartRequestProcess {
 
         while (!isMessageBodyCompleted(inputStream)) {
 
-            String messageHeader = HeaderHandler.headerReader(inputStream);
+            String messageHeader = HeaderHandler.readHeader(inputStream);
             Hashtable<String, String> headerTable = HeaderHandler
-                    .getclientHeadersinHashTable(messageHeader);
+                    .getClientHeaders(messageHeader);
 
 
             String fileName = processHeaders(headerTable);

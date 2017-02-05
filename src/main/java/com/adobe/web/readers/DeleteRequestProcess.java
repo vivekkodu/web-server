@@ -14,7 +14,7 @@ public class DeleteRequestProcess extends HttpRequestProcessor {
 
     public static void handleDeleteRequest(String requestUri) throws IOException, MalformedRequestException {
         Hashtable<String, String> getHeaders = getAllHeaders();
-        String decodedUri = decodeURI(requestUri);
+        String decodedUri = decodeUri(requestUri);
         System.out.println("decoded uri" + decodedUri);
         if (decodedUri == null) {
             //ToDo: Need to return proper formatted response
@@ -22,17 +22,17 @@ public class DeleteRequestProcess extends HttpRequestProcessor {
         }
 
         if (decodedUri.equals(WebServerConstants.URISeparator)) {
-            Reader.serverFormattedResponseToClient("404", "Resource not found", "the file you requested - " + decodedUri
+            ReaderHelper.serverFormattedResponseToClient("404", "Resource not found", "the file you requested - " + decodedUri
                     + " does not exist on server" + "<hr>", charStreamOutput, outputStream, "close");
         }
 
-        String resourcePath = getAbsoluteFilePath(decodedUri);
+        String resourcePath = ReaderHelper.getAbsoluteFilePath(decodedUri);
         System.out.println("resourcePath==" + resourcePath);
         File file = new File(resourcePath);
         System.out.println("file length is ==" + file.length());
         if (file == null) {
             System.out.println("file length" + file.length());
-            Reader.serverFormattedResponseToClient("404", "File Not Found", "the file you requested - " + decodedUri
+            ReaderHelper.serverFormattedResponseToClient("404", "File Not Found", "the file you requested - " + decodedUri
                     + " does not exist on server" + "<hr>", charStreamOutput, outputStream, "close");
             return;
         }

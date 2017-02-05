@@ -2,7 +2,7 @@ package com.adobe.web.client;
 
 import com.adobe.web.readers.GetRequestProcess;
 import com.adobe.web.readers.PostRequestProcess;
-import com.adobe.web.readers.Reader;
+import com.adobe.web.readers.ReaderHelper;
 import com.adobe.web.server.MalformedRequestException;
 import com.adobe.web.utils.ResponseCodeParams;
 import com.adobe.web.utils.WebServerConstants;
@@ -51,7 +51,7 @@ public class WebClient {
             charStream = new BufferedWriter(new OutputStreamWriter(
                     outputstream, WebServerConstants.HttpHeadersEncoding));
 
-            String requestLine = Reader.requestReader(inputStream);
+            String requestLine = ReaderHelper.requestReader(inputStream);
             logger.debug("requestLine is " + requestLine);
             StringTokenizer st = new StringTokenizer(requestLine, " ");
             int requestTokens = st.countTokens();
@@ -88,7 +88,7 @@ public class WebClient {
                 new PostRequestProcess(inputStream, outputstream, charStream)
                         .handlePostRequest(requestPath);
             } else {
-                Reader.serverFormattedResponseToClient(
+                ReaderHelper.serverFormattedResponseToClient(
                         ResponseCodeParams.METHOD_NOT_ALLOWED,
                         "Method not allowed",
                         "the  HTTP method you requested is not supported by the server",
@@ -102,7 +102,7 @@ public class WebClient {
             logger.error("uri is not properly formed"
                     + malformedRequestException.getMessage());
             try {
-                Reader.serverFormattedResponseToClient(ResponseCodeParams.BAD_REQUEST,
+                ReaderHelper.serverFormattedResponseToClient(ResponseCodeParams.BAD_REQUEST,
                         "Bad request", "the request uri is not applicable", charStream, outputstream, "close");
             } catch (FileNotFoundException e) {
                 logger.error("the requested uri is not applicable" + e.getMessage());

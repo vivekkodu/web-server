@@ -5,9 +5,6 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
 import java.io.*;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.Properties;
 
 /**
@@ -18,7 +15,6 @@ public class HttpWebServer {
     private static Logger logger = Logger.getLogger(HttpWebServer.class
             .getName());
     private static ServerManager serverManager = null;
-    private static int requestArrived = 0;
 
     /**
      * It read configuration file and initialize the server properties.
@@ -60,7 +56,7 @@ public class HttpWebServer {
      *
      * @throws InterruptedException Exception on interruptions.
      */
-    public void serverStop() throws InterruptedException {
+    public void stopServer() throws InterruptedException {
         serverManager.stopManager();
         System.exit(0);
     }
@@ -105,74 +101,10 @@ public class HttpWebServer {
         }
 
         try {
-            webServer.serverStop();
+            webServer.stopServer();
         } catch (InterruptedException e) {
             logger.error("server could not be stopped properly .. exiting thread");
             return;
-        }
-    }
-
-    /**
-     * It manages the server lifecycle. It also handles server requests.
-     */
-    public class ServerManager implements Runnable {
-        private HttpRequestHandler handler = null;
-        private boolean isActive = true;
-        public ServerSocket serverSocket;
-
-        @Override
-        public void run() {
-            handler = new HttpRequestHandler();
-            try {
-                logger.info("Starting server on port " + WebServerConstants.PORT);
-                serverSocket = new ServerSocket(WebServerConstants.PORT, WebServerConstants.QUEUE_SIZE,
-                        InetAddress.getByName("localhost"));
-            } catch (Exception e) {
-                logger.info("Could not start server on port: "
-                        + WebServerConstants.PORT + "The port number :"
-                        + WebServerConstants.PORT
-                        + "may be already in use.Try with other port");
-                System.exit(0);
-            }
-
-            logger.trace("Server is started on the port " + WebServerConstants.PORT);
-
-            handler.initializeThreadPool();
-
-            while (isActive) {
-                try {
-                    Socket socket = serverSocket.accept();
-                    requestArrived++;
-
-                    synchronized (handler.httpRequestQueue) {
-                        while (handler.httpRequestQueue.size() >= WebServerConstants.QUEUE_SIZE) {
-                            handler.httpRequestQueue.wait();
-                        }
-
-                        handler.httpRequestQueue.add(socket);
-                        handler.httpRequestQueue.notify();
-                    }
-                } catch (Exception e) {
-                    if (serverSocket.isClosed())
-                        System.out.println("Server Stopped");
-                    // Stop();
-                    return;
-                    // System.exit(0);
-                }
-            }
-        }
-
-        public void stopManager() {
-            logger.info("Stopping the manager");
-            handler.destroyThreadPool();
-            try {
-                serverSocket.close();
-            } catch (IOException e) {
-                logger.error("error in closing the socket" + e.getMessage());
-            }
-
-            isActive = false;
-            logger.info("Stopped manager");
         }
     }
 }

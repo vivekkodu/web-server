@@ -1,7 +1,6 @@
 package com.adobe.web.readers;
 
 import com.adobe.web.server.MalformedRequestException;
-import com.adobe.web.utils.ResponseCodeParams;
 import com.adobe.web.utils.WebServerConstants;
 import org.apache.log4j.Logger;
 
@@ -13,7 +12,6 @@ import java.util.Hashtable;
  */
 public class GetRequestProcess extends HttpRequestProcessor {
 
-    public Hashtable<String, String> getFields;
     private static Logger logger = Logger.getLogger(GetRequestProcess.class
             .getName());
     private static String connectionStatus;
@@ -39,17 +37,17 @@ public class GetRequestProcess extends HttpRequestProcessor {
 
         Hashtable<String, String> getHeaders = this.getAllHeaders();
         connectionStatus = getHeaders.get("Connection");
-        String decodedUri = decodeURI(requestUri);
+        String decodedUri = decodeUri(requestUri);
         if (decodedUri == null) {
             //ToDo: Need to return proper formatted response
             logger.error("the decoded uri is null");
             return;
         }
 
-        String resourcePath = getAbsoluteFilePath(decodedUri);
+        String resourcePath = ReaderHelper.getAbsoluteFilePath(decodedUri);
         File file = new File(resourcePath);
         if (file == null) {
-            Reader.serverFormattedResponseToClient("404", "File Not Found",
+            ReaderHelper.serverFormattedResponseToClient("404", "File Not Found",
                     "the file you requested - " + decodedUri
                             + " does not exist on server" + "<hr>",
                     charStreamOutput, outputStream, "close");
@@ -59,11 +57,11 @@ public class GetRequestProcess extends HttpRequestProcessor {
 
         if (file.isDirectory()) {
             //ToDo: Need to return proper formatted response
-            processDirectories(file, decodedUri);
+            this.processDirectoriesRequest(file, decodedUri);
             return;
         }
 
-        Reader.clientResponseWithBody("200", "OK", file, charStreamOutput,
+        ReaderHelper.clientResponseWithBody("200", "OK", file, charStreamOutput,
                 outputStream, connectionStatus);
     }
 
@@ -74,7 +72,7 @@ public class GetRequestProcess extends HttpRequestProcessor {
      * @param requestUri request uri
      * @throws FileNotFoundException exception when file is not found
      */
-    public static void processDirectories(File file, String requestUri)
+    private void processDirectoriesRequest(File file, String requestUri)
             throws FileNotFoundException {
         File[] fileArray = file.listFiles();
         StringBuffer htmlLinks = new StringBuffer(100);
@@ -84,7 +82,7 @@ public class GetRequestProcess extends HttpRequestProcessor {
                     + "\">" + fileArray[i].getName() + "</a></BR>");
         }
 
-        Reader.serverFormattedResponseToClient(
+        ReaderHelper.serverFormattedResponseToClient(
                 "200",
                 "OK",
                 "The location you requested is a folder. Please follow links below to browse through the files .. <hr>"

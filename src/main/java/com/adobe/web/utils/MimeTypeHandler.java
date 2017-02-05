@@ -1,6 +1,7 @@
 package com.adobe.web.utils;
 
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
@@ -35,10 +36,8 @@ public class MimeTypeHandler {
     }
 
     private MimeTypeHandler() throws IOException {
-        // TODO Auto-generated constructor st{
         mimeTypes = new HashMap<String, String>(1000);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/mime.types")));
-        //new FileInputStream("mime.types")) );
+        BufferedReader reader = new BufferedReader(new FileReader("mime.types"));
         String next = null;
         String[] nextSplitted = null;
         while ((next = reader.readLine()) != null) {

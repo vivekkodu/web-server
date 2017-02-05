@@ -15,7 +15,6 @@ import java.util.Iterator;
  */
 public class PostRequestProcess extends HttpRequestProcessor {
 
-    public Hashtable<String, String> postFields;
     private static File uploadDirectDefault = new File(WebServerConstants.HOSTPATH,
             WebServerConstants.UPLOAD_PATH);
     private static String uploadRelativePath = (File.separator + WebServerConstants.UPLOAD_PATH)
@@ -29,8 +28,9 @@ public class PostRequestProcess extends HttpRequestProcessor {
     /**
      * This will create a postRequestProcess object and initialize that with the
      * streams connected to the client
-     * @param bufferedByteInputStream byte input stream
-     * @param bufferedByeOutputStream byte output stream
+     *
+     * @param bufferedByteInputStream  byte input stream
+     * @param bufferedByeOutputStream  byte output stream
      * @param bufferedCharOutputStream character output stream
      */
     public PostRequestProcess(BufferedInputStream bufferedByteInputStream,
@@ -42,15 +42,16 @@ public class PostRequestProcess extends HttpRequestProcessor {
 
     /**
      * This will handle post requests
+     *
      * @param requestUri Request uri
-     * @throws IOException Exception in case of input/outpu failures
+     * @throws IOException               Exception in case of input/outpu failures
      * @throws MalformedRequestException Exception if uri is malformed
      */
     public void handlePostRequest(String requestUri) throws IOException,
             MalformedRequestException {
         Hashtable<String, String> headerList = this.getAllHeaders();
         connectionStatus = headerList.get("Connection");
-        String decodedUri = decodeURI(requestUri);
+        String decodedUri = decodeUri(requestUri);
         if (decodedUri == null) {
             //ToDo: Need to return proper formatted response
             logger.error("the requested uri cannot be decoded");
@@ -62,7 +63,7 @@ public class PostRequestProcess extends HttpRequestProcessor {
         if (isMultipart) {
             String path = findLocationToUpload(decodedUri);
             if (path == null) {
-                Reader.serverFormattedResponseToClient(
+                ReaderHelper.serverFormattedResponseToClient(
                         ResponseCodeParams.FILE_NOT_FOUND,
                         "Not Found",
 
@@ -96,7 +97,7 @@ public class PostRequestProcess extends HttpRequestProcessor {
                     logger.trace((char) messageBody[i]);
                 contentLength -= len;
 
-                Reader.serverFormattedResponseToClient(ResponseCodeParams.OK,
+                ReaderHelper.serverFormattedResponseToClient(ResponseCodeParams.OK,
                         "OK", "request recieved and processed<hr>",
                         charStreamOutput, outputStream, connectionStatus);
             }
@@ -105,6 +106,7 @@ public class PostRequestProcess extends HttpRequestProcessor {
 
     /**
      * this will process the post request headers
+     *
      * @param headerList Header list
      * @return hashtable having header list
      */
@@ -137,7 +139,7 @@ public class PostRequestProcess extends HttpRequestProcessor {
                 if (boundaryValue == null) {
                     logger.error("boundary value is not properly formed");
                     try {
-                        Reader.serverFormattedResponseToClient(
+                        ReaderHelper.serverFormattedResponseToClient(
                                 ResponseCodeParams.BAD_REQUEST,
                                 "Bad request",
                                 "boundary value not available in multipart request",
@@ -163,7 +165,7 @@ public class PostRequestProcess extends HttpRequestProcessor {
         if (length < 0) {
             logger.error("Content-Length" + " should be properly set ");
             try {
-                Reader.serverFormattedResponseToClient(
+                ReaderHelper.serverFormattedResponseToClient(
                         ResponseCodeParams.BAD_REQUEST, " Bad Request",
                         "Content-length" + " should be properly set" + "<hr>",
                         charStreamOutput, outputStream, "close");
@@ -235,7 +237,7 @@ public class PostRequestProcess extends HttpRequestProcessor {
                     + "\"" + ">" + name + "</a>" + "</BR>");
         }
 
-        Reader.serverFormattedResponseToClient(
+        ReaderHelper.serverFormattedResponseToClient(
                 "201",
                 "Created",
                 "your data has been uploaded to the server. please follow the below links to check uploaded data<hr>"

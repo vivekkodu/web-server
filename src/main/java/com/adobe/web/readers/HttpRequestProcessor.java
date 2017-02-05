@@ -42,9 +42,9 @@ public abstract class HttpRequestProcessor {
      * @throws MalformedRequestException Exception if request is malformed.
      */
     public static Hashtable<String, String> getAllHeaders() throws IOException, MalformedRequestException {
-        String requestHeaders = HeaderHandler.headerReader(inputStream);
+        String requestHeaders = HeaderHandler.readHeader(inputStream);
         Hashtable<String, String> headerPropertyMap = HeaderHandler
-                .getclientHeadersinHashTable(requestHeaders);
+                .getClientHeaders(requestHeaders);
         return headerPropertyMap;
     }
 
@@ -54,43 +54,18 @@ public abstract class HttpRequestProcessor {
      * @return null if uri can't be decoded, else decoded uri
      * @throws IOException exception during input/output operation
      */
-    public static String decodeURI(String requestURI) throws IOException {
+    public static String decodeUri(String requestURI) throws IOException {
         String decodedURI = null;
         try {
             decodedURI = URLDecoder.decode(requestURI,
                     WebServerConstants.ENCODING);
         } catch (UnsupportedEncodingException e2) {
             logger.error("request uri could not decoded . " + e2.getMessage());
-            Reader.serverFormattedResponseToClient("500",
+            ReaderHelper.serverFormattedResponseToClient("500",
                     "Internal Server Error", "url could not be decoded",
                     charStreamOutput, outputStream, "close");
         }
 
         return decodedURI;
     }
-
-    /**
-     * Creates the file path for the file which has to be deleted.
-     * @param requestUri Client requset uri
-     * @return Return absolute path for the file which is requested to be deleted.
-     */
-    protected static String getAbsoluteFilePath(String requestUri) {
-        String resourcePath = null;
-        StringBuffer outputResource = new StringBuffer(50);
-        if (requestUri.equals("/")) {
-            resourcePath = WebServerConstants.HOSTPATH + File.separator + "index.html";
-            return resourcePath;
-        } else {
-            String pathList[] = requestUri.split(WebServerConstants.URISeparator);
-            for (int i = 0; i < pathList.length; i++) {
-                if (pathList[i] != null && pathList[i].length() > 0)
-                    outputResource.append(File.separator + pathList[i]);
-            }
-
-            resourcePath = WebServerConstants.HOSTPATH + outputResource.toString();
-        }
-
-        return resourcePath;
-    }
-
 }
