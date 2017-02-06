@@ -66,9 +66,8 @@ public class PostRequestProcess extends HttpRequestProcessor {
                 ReaderHelper.serverFormattedResponseToClient(
                         ResponseCodeParams.FILE_NOT_FOUND,
                         "Not Found",
-
                         "neither the location requested nor default location is available for upload of files"
-                                + "<hr>", charStreamOutput, outputStream, "close");
+                                + "<hr>", outputStream, "close");
                 logger.info("upload location could not be created due to some security restrictions - ");
                 return;
             }
@@ -97,10 +96,11 @@ public class PostRequestProcess extends HttpRequestProcessor {
                     logger.trace((char) messageBody[i]);
                 contentLength -= len;
 
-                ReaderHelper.serverFormattedResponseToClient(ResponseCodeParams.OK,
-                        "OK", "request recieved and processed<hr>",
-                        charStreamOutput, outputStream, connectionStatus);
             }
+
+            ReaderHelper.serverFormattedResponseToClient(ResponseCodeParams.OK,
+                    "OK", "request recieved and processed<hr>",
+                    outputStream, connectionStatus);
         }
     }
 
@@ -115,7 +115,7 @@ public class PostRequestProcess extends HttpRequestProcessor {
         Hashtable<String, Object> properties = new Hashtable<String, Object>(5);
         String boundaryValue = null;
         boolean isMultipart = false;
-        String[] contentTypeArray = null;
+        String[] contentTypeArray;
         String contentType = headerList.get("Content-Type");
         if (contentType != null) {
             contentTypeArray = contentType.split(";");
@@ -138,17 +138,13 @@ public class PostRequestProcess extends HttpRequestProcessor {
 
                 if (boundaryValue == null) {
                     logger.error("boundary value is not properly formed");
-                    try {
-                        ReaderHelper.serverFormattedResponseToClient(
-                                ResponseCodeParams.BAD_REQUEST,
-                                "Bad request",
-                                "boundary value not available in multipart request",
-                                charStreamOutput, outputStream, "close");
-                    } catch (FileNotFoundException e) {
-                        logger.error("File cannot be found" + e.getMessage());
-                    }
+                    ReaderHelper.serverFormattedResponseToClient(
+                            ResponseCodeParams.BAD_REQUEST,
+                            "Bad request",
+                            "boundary value not available in multipart request",
+                            outputStream, "close");
 
-                    return null;
+                    return properties;
                 }
             }
         }
@@ -164,18 +160,12 @@ public class PostRequestProcess extends HttpRequestProcessor {
 
         if (length < 0) {
             logger.error("Content-Length" + " should be properly set ");
-            try {
-                ReaderHelper.serverFormattedResponseToClient(
-                        ResponseCodeParams.BAD_REQUEST, " Bad Request",
-                        "Content-length" + " should be properly set" + "<hr>",
-                        charStreamOutput, outputStream, "close");
-            } catch (FileNotFoundException e) {
-                logger.error("file cannot be found..it is a bad request"
-                        + e.getMessage());
+            ReaderHelper.serverFormattedResponseToClient(
+                    ResponseCodeParams.BAD_REQUEST, " Bad Request",
+                    "Content-length" + " should be properly set" + "<hr>",
+                    outputStream, "close");
 
-            }
-
-            return null;
+            return properties;
         }
 
         properties.put("Content-Length", length);
@@ -194,7 +184,7 @@ public class PostRequestProcess extends HttpRequestProcessor {
      * @return the String containing the upload location for file
      */
     private static String findLocationToUpload(String requestURI) {
-        File uploadDir = null;
+        File uploadDir;
         if (requestURI.length() > 0
                 && !requestURI.equals(WebServerConstants.URISeparator)) {
 
@@ -241,6 +231,6 @@ public class PostRequestProcess extends HttpRequestProcessor {
                 "201",
                 "Created",
                 "your data has been uploaded to the server. please follow the below links to check uploaded data<hr>"
-                        + HtmlLinks.toString(), charStreamOutput, outputStream, "close");
+                        + HtmlLinks.toString(), outputStream, "close");
     }
 }

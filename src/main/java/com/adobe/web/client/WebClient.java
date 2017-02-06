@@ -18,10 +18,7 @@ import java.util.StringTokenizer;
 /**
  * This class will receive the request and triggers appropriate handler to
  * handle the request
- *
- * @author vivekkodu
  */
-
 public class WebClient {
 
     private BufferedInputStream inputStream = null;
@@ -32,7 +29,6 @@ public class WebClient {
     String method;
     String version;
     String requestUri;
-    public Hashtable<String, String> headers;
     Logger logger = Logger.getLogger(WebClient.class.getName());
 
     /**
@@ -73,10 +69,10 @@ public class WebClient {
             try {
                 uriRequest = new URI(requestUri);
             } catch (URISyntaxException uriSyntaxException) {
-                logger.error("uri is not properly formed"
+                logger.error("uri is not properly formed."
                         + uriSyntaxException.getMessage());
                 throw new MalformedRequestException(
-                        "uri is not properly formed");
+                        "uri is not properly formed.");
             }
 
             String requestPath = uriRequest.getPath();
@@ -92,21 +88,17 @@ public class WebClient {
                         ResponseCodeParams.METHOD_NOT_ALLOWED,
                         "Method not allowed",
                         "the  HTTP method you requested is not supported by the server",
-                        charStream, outputstream, "close");
+                        outputstream, "close");
             }
         } catch (IOException ioException) {
             logger.error("read of input stream cannot be done properly"
                     + ioException.getMessage());
 
         } catch (MalformedRequestException malformedRequestException) {
-            logger.error("uri is not properly formed"
+            logger.error("uri is not properly formed."
                     + malformedRequestException.getMessage());
-            try {
                 ReaderHelper.serverFormattedResponseToClient(ResponseCodeParams.BAD_REQUEST,
-                        "Bad request", "the request uri is not applicable", charStream, outputstream, "close");
-            } catch (FileNotFoundException e) {
-                logger.error("the requested uri is not applicable" + e.getMessage());
-            }
+                        "Bad request", "the request uri is not applicable", outputstream, "close");
         } finally {
             try {
                 if (charStream != null)

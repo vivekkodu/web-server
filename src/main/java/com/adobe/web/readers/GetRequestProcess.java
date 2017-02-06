@@ -50,8 +50,8 @@ public class GetRequestProcess extends HttpRequestProcessor {
             ReaderHelper.serverFormattedResponseToClient("404", "File Not Found",
                     "the file you requested - " + decodedUri
                             + " does not exist on server" + "<hr>",
-                    charStreamOutput, outputStream, "close");
-            logger.error("the requested file doesnot exists on the server.Regret for inconvenience");
+                    outputStream, "close");
+            logger.error("the requested file doesn't exists on the server.Regret for inconvenience");
             return;
         }
 
@@ -85,8 +85,8 @@ public class GetRequestProcess extends HttpRequestProcessor {
         ReaderHelper.serverFormattedResponseToClient(
                 "200",
                 "OK",
-                "The location you requested is a folder. Please follow links below to browse through the files .. <hr>"
-                        + htmlLinks.toString(), charStreamOutput, outputStream,
+                "Invalid location reached."
+                        + htmlLinks.toString(), outputStream,
                 connectionStatus);
         return;
     }

@@ -166,7 +166,7 @@ public class MultipartRequestProcess {
      */
     private String processHeaders(Hashtable<String, String> headerList) {
         String fileName = null;
-        Hashtable<String, String> headerTable = new Hashtable<>(10);
+        Hashtable<String, String> headerTable;
         if (headerList.containsKey(contentDisposition)) {
 
             String value = headerList.get(contentDisposition);

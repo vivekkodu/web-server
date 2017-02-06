@@ -13,7 +13,7 @@ public class HeaderHandler {
 
     /**
      * This class will read each line and determine if the message body is
-     * reached terminated by two CRLF's oderwise it will append each line to the
+     * reached terminated by two CRLF's otherwise it will append each line to the
      * String buffer
      *
      * @param clientInput input stream

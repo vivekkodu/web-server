@@ -38,8 +38,8 @@ public class MimeTypeHandler {
     private MimeTypeHandler() throws IOException {
         mimeTypes = new HashMap<String, String>(1000);
         BufferedReader reader = new BufferedReader(new FileReader("mime.types"));
-        String next = null;
-        String[] nextSplitted = null;
+        String next;
+        String[] nextSplitted;
         while ((next = reader.readLine()) != null) {
             next = next.trim();
             if (next.charAt(0) != '#') {

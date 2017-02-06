@@ -13,7 +13,6 @@ public class ThreadPoolManager {
             .getName());
 
     public class HttpRequestSchedulerThread implements Runnable {
-        @SuppressWarnings("deprecation")
         public void run() {
             long current;
             try {
@@ -22,9 +21,9 @@ public class ThreadPoolManager {
                     for (int i = 0; i < WebServerConstants.THREAD_POOL_SIZE; i++) {
                         if (ThreadInformation.hasRequest[i]
                                 && (current - ThreadInformation.lastSeenAt[i]) > WebServerConstants.requestTimeOut) {
-                            // But this will close the thread completely.
-                            //ToDO: Need to dissociate task with thread.
                             httpWebServerThread[i].interrupt();
+                            httpWebServerThread[i] = new Thread(new HttpSchedulerThread(i));
+                            httpWebServerThread[i].start();
                         }
                     }
 
@@ -47,7 +46,7 @@ public class ThreadPoolManager {
             httpWebServerThread[i].start();
         }
 
-        // starting the schduler thread that is scheduling the threads in the
+        // starting the scheduler thread that is scheduling the threads in the
         // threadPool
 
         Thread httpRequestSchedulerThread = new Thread(

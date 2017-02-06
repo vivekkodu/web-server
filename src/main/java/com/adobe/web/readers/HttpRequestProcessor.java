@@ -63,7 +63,7 @@ public abstract class HttpRequestProcessor {
             logger.error("request uri could not decoded . " + e2.getMessage());
             ReaderHelper.serverFormattedResponseToClient("500",
                     "Internal Server Error", "url could not be decoded",
-                    charStreamOutput, outputStream, "close");
+                    outputStream, "close");
         }
 
         return decodedURI;

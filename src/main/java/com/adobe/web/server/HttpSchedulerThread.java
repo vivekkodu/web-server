@@ -31,15 +31,14 @@ public class HttpSchedulerThread implements Runnable {
                     }
 
                     socket = RequestQueue.httpRequestQueue.poll();
-                    System.out.println("Executor Thread" + Thread.currentThread().getName());
-                    WebClient client = new WebClient(socket);
-                    client.handleClient();
+                    System.out.println("Executor Thread: " + Thread.currentThread().getName());
                     RequestQueue.httpRequestQueue.notify();
                 }
 
+                WebClient client = new WebClient(socket);
                 socket.setSoTimeout(WebServerConstants.requestTimeOut);
+                client.handleClient();
                 ThreadInformation.hasRequest[threadID] = true;
-                socket.setSoTimeout(WebServerConstants.requestTimeOut);
                 try {
                     ThreadInformation.lastSeenAt[threadID] = System.currentTimeMillis();
                     synchronized (ThreadInformation.requestServed) {
@@ -49,6 +48,8 @@ public class HttpSchedulerThread implements Runnable {
                     ThreadInformation.hasRequest[threadID] = false;
                     Thread.interrupted();
                 }
+
+                ThreadInformation.hasRequest[threadID] = false;
 
                 socket.close();
             } catch (IOException e) {

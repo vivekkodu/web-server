@@ -111,16 +111,13 @@ public class ReaderHelper {
      * @param statusCode Status code
      * @param responseMessage Response message
      * @param formattedMessageBody Formatted response message
-     * @param charStreamBufferedOut Character Stream output buffer
      * @param byteStreamBufferedOut Byte stream output buffer
      * @param Connection Connection details
      * @throws FileNotFoundException Exception if file is not present
      */
     public static void serverFormattedResponseToClient(String statusCode,
                                                        String responseMessage, String formattedMessageBody,
-                                                       BufferedWriter charStreamBufferedOut,
-                                                       BufferedOutputStream byteStreamBufferedOut, String Connection)
-            throws FileNotFoundException {
+                                                       BufferedOutputStream byteStreamBufferedOut, String Connection){
         StringBuffer outputMessage = new StringBuffer(300);
         outputMessage.append("HTTP/1.1 " + statusCode + " " + responseMessage);
         outputMessage.append(WebServerConstants.CRLF);
@@ -146,58 +143,27 @@ public class ReaderHelper {
     }
 
     /**
-     * This will create the message body
-     * @param statusCode Satus code for output
-     * @param responseMessage Response body
-     * @param messageBody Message body for response
-     * @return Complete formatted response body
+     * Creates the file path for the file which has to be deleted.
+     * @param requestUri Client requset uri
+     * @return Return absolute path for the file which is requested to be deleted.
      */
-    public static String createFormattedMessageBody(String statusCode,
-                                                    String responseMessage, String messageBody) {
-        int length = messageBody.length();
-        String body = null;
-        if (messageBody == null || length == 0) {
-            body = "<hr>nothing is there for you</hr>";
+    public static String getAbsoluteFilePath(String requestUri) {
+        String resourcePath;
+        StringBuffer outputResource = new StringBuffer(50);
+        if (requestUri.equals("/")) {
+            resourcePath = WebServerConstants.HOSTPATH + File.separator + "index.html";
+            return resourcePath;
+        } else {
+            String pathList[] = requestUri.split(WebServerConstants.URISeparator);
+            for (int i = 0; i < pathList.length; i++) {
+                if (pathList[i] != null && pathList[i].length() > 0)
+                    outputResource.append(File.separator + pathList[i]);
+            }
+
+            resourcePath = WebServerConstants.HOSTPATH + outputResource.toString();
         }
 
-        body = "<HTML>" + "<HEAD>" + "<TITLE>" + responseMessage + "</TITLE>"
-                + "</HEAD>" + "<BODY>" + "<H3><center><font size=10>" + statusCode + ". "
-                + responseMessage + "</font></center></H3>" + "</BR>" + "<p><center><font size=6>" + messageBody
-                + "</font></center></p>" + "</BODY>" + "</HTML>";
-        return body;
-    }
-
-    public static String getServerTime() {
-        Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat dateFormat = new SimpleDateFormat(
-                "EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
-        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-        return dateFormat.format(calendar.getTime());
-    }
-
-    /**
-     * This will convert the file as stream
-     * @param file File object
-     * @param charStreamBufferedOut Character ouput buffer
-     * @param outputStream Output stream
-     * @return Stream of input file
-     * @throws FileNotFoundException Exception if file is not present.
-     */
-    public static BufferedInputStream processResourceAsStream(File file,
-                                                              BufferedWriter charStreamBufferedOut,
-                                                              BufferedOutputStream outputStream) throws FileNotFoundException {
-        BufferedInputStream fileResource = null;
-        try {
-            fileResource = new BufferedInputStream(new FileInputStream(file));
-        } catch (FileNotFoundException e1) {
-            ReaderHelper.serverFormattedResponseToClient(ResponseCodeParams.FILE_NOT_FOUND, "Not Found",
-                    "the file you requested - " + file.getName()
-                            + " does not exist on server" + "<hr>",
-                    charStreamBufferedOut, outputStream, "close");
-            logger.info("file requested does not exist - " + file.getName());
-        }
-
-        return fileResource;
+        return resourcePath;
     }
 
     /**
@@ -224,26 +190,58 @@ public class ReaderHelper {
     }
 
     /**
-     * Creates the file path for the file which has to be deleted.
-     * @param requestUri Client requset uri
-     * @return Return absolute path for the file which is requested to be deleted.
+     * This will create the message body
+     * @param statusCode Satus code for output
+     * @param responseMessage Response body
+     * @param messageBody Message body for response
+     * @return Complete formatted response body
      */
-    public static String getAbsoluteFilePath(String requestUri) {
-        String resourcePath;
-        StringBuffer outputResource = new StringBuffer(50);
-        if (requestUri.equals("/")) {
-            resourcePath = WebServerConstants.HOSTPATH + File.separator + "index.html";
-            return resourcePath;
-        } else {
-            String pathList[] = requestUri.split(WebServerConstants.URISeparator);
-            for (int i = 0; i < pathList.length; i++) {
-                if (pathList[i] != null && pathList[i].length() > 0)
-                    outputResource.append(File.separator + pathList[i]);
-            }
-
-            resourcePath = WebServerConstants.HOSTPATH + outputResource.toString();
+    private static String createFormattedMessageBody(String statusCode,
+                                                     String responseMessage, String messageBody) {
+        int length = messageBody.length();
+        String body = null;
+        if (messageBody == null || length == 0) {
+            body = "<hr>nothing is there for you.</hr>";
+            return body;
         }
 
-        return resourcePath;
+        body = "<HTML>" + "<HEAD>" + "<TITLE>" + responseMessage + "</TITLE>"
+                + "</HEAD>" + "<BODY>" + "<H3><center><font size=10>" + statusCode + ". "
+                + responseMessage + "</font></center></H3>" + "</BR>" + "<p><center><font size=6>" + messageBody
+                + "</font></center></p>" + "</BODY>" + "</HTML>";
+        return body;
+    }
+
+    private static String getServerTime() {
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat dateFormat = new SimpleDateFormat(
+                "EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
+        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+        return dateFormat.format(calendar.getTime());
+    }
+
+    /**
+     * This will convert the file as stream
+     * @param file File object
+     * @param charStreamBufferedOut Character ouput buffer
+     * @param outputStream Output stream
+     * @return Stream of input file
+     * @throws FileNotFoundException Exception if file is not present.
+     */
+    private static BufferedInputStream processResourceAsStream(File file,
+                                                               BufferedWriter charStreamBufferedOut,
+                                                               BufferedOutputStream outputStream) throws FileNotFoundException {
+        BufferedInputStream fileResource = null;
+        try {
+            fileResource = new BufferedInputStream(new FileInputStream(file));
+        } catch (FileNotFoundException e1) {
+            ReaderHelper.serverFormattedResponseToClient(ResponseCodeParams.FILE_NOT_FOUND, "Not Found",
+                    "the file you requested - " + file.getName()
+                            + " does not exist on server" + "<hr>",
+                    outputStream, "close");
+            logger.info("file requested does not exist - " + file.getName());
+        }
+
+        return fileResource;
     }
 }

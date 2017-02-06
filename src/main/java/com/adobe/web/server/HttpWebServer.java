@@ -48,7 +48,6 @@ public class HttpWebServer {
         serverManager = new ServerManager();
         Thread serverManagerThread = new Thread(serverManager);
         serverManagerThread.start();
-        serverManagerThread.interrupt();
     }
 
     /**
@@ -97,7 +96,6 @@ public class HttpWebServer {
                 ;
         } catch (IOException e) {
             logger.error("key pressed cant be read");
-
         }
 
         try {
